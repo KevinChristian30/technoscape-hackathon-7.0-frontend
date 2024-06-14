@@ -1,4 +1,5 @@
 import http from "@/lib/axios";
+import makeResponseDTO from "@/lib/response";
 import { z } from "zod";
 
 export interface LoginPayload {
@@ -6,9 +7,11 @@ export interface LoginPayload {
   password: string;
 }
 
-const loginResponseValidation = z.object({
-  token: z.string()
-});
+const loginResponseValidation = makeResponseDTO(
+  z.object({
+    token: z.string()
+  })
+);
 
 export type LoginResponse = z.infer<typeof loginResponseValidation>;
 

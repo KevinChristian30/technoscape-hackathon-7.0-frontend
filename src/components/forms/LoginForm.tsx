@@ -32,7 +32,7 @@ const LoginForm = () => {
     if (status === "error") {
       toast({
         title: "Something went wrong",
-        description: error.response?.data.message ?? "Failed logging in",
+        description: error.response?.data.errors[0] ?? "Failed logging in",
         variant: "destructive"
       });
 
@@ -41,7 +41,7 @@ const LoginForm = () => {
       toast({
         title: "Success",
         description: "Logged in, redirecting you soon",
-        variant: "success",
+        variant: "success"
       });
       form.reset();
     }

@@ -1,9 +1,8 @@
-import React from 'react'
+import PageLayout from "@/components/layouts/PageLayout";
+import React from "react";
 
 const Page = () => {
-  return (
-    <div>Analytics</div>
-  )
-}
+  return <PageLayout title="Analytics"></PageLayout>;
+};
 
-export default Page
+export default Page;
