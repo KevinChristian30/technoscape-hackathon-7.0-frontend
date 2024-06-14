@@ -1,6 +1,6 @@
 "use client";
 
-import PageLayout from "@/components/layouts/PageLayout";
+import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -18,7 +18,9 @@ export default function Page() {
   const { email } = useUser();
 
   return (
-    <PageLayout title="Settings">
+    <PageLayout>
+      <PageLayoutHeader>Settings</PageLayoutHeader>
+
       <div className="mx-auto grid w-full max-w-6xl items-start gap-6">
         <div className="grid gap-6">
           <Card x-chunk="dashboard-04-chunk-1">
