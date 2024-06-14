@@ -15,5 +15,5 @@ export type MeResponse = z.infer<typeof meResponseValidation>;
 
 export const meGet = async (): Promise<MeResponse> => {
   const res = await http.get<MeResponse>("user");
-  return meResponseValidation.parse(res.data.data);
+  return meResponseValidation.parse(res.data);
 };

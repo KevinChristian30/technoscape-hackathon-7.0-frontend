@@ -12,7 +12,12 @@ type UserContextData = {
   role: string;
 };
 
-const CurrentUserContext = createContext<UserContextData | null>(null);
+const CurrentUserContext = createContext<UserContextData>({
+  email: "",
+  id: "",
+  name: "",
+  role: ""
+});
 
 export function useUser() {
   return useContext(CurrentUserContext);
@@ -26,13 +31,11 @@ const UserProvider = ({
   const { data, status } = useMe();
 
   const user = useMemo<UserContextData>(() => {
-    console.log(data);
-    
     return {
-      email: "",
-      id: "",
-      name: "",
-      role: ""
+      email: data ? data.data.email : "",
+      id: data ? data.data.id : "",
+      name: data ? data.data.name : "",
+      role: data ? data.data.role : ""
     };
   }, [data]);
 

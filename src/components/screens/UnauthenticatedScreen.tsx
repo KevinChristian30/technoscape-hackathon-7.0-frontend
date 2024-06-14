@@ -27,7 +27,7 @@ const UnathenticatedScreen = () => {
           />
           <h1 className="text-2xl">Session Expired</h1>
         </div>
-        <Link href={"/sign-in"}>
+        <Link href={"/login"}>
           <Button size={"lg"}>Sign In</Button>
         </Link>
       </div>

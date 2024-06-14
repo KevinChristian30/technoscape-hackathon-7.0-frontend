@@ -19,5 +19,5 @@ export const loginPost = async (
   payload: LoginPayload
 ): Promise<LoginResponse> => {
   const res = await http.post<LoginResponse>("auth/login", payload);
-  return loginResponseValidation.parse(res.data.data);
+  return loginResponseValidation.parse(res.data);
 };
