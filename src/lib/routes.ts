@@ -1,7 +1,12 @@
 import {
   BarChart2,
+  BotMessageSquare,
+  Headset,
   LayoutDashboard,
   LucideIcon,
+  Mail,
+  MessageCircle,
+  NotebookText,
   UsersRound,
 } from "lucide-react";
 
@@ -11,7 +16,7 @@ export interface Route {
   url: string;
 }
 
-export const routes: Route[] = [
+export const adminRoutes: Route[] = [
   {
     name: "Dashboard",
     icon: LayoutDashboard,
@@ -28,3 +33,40 @@ export const routes: Route[] = [
     url: "/analytics",
   },
 ];
+
+export const agentRoutes: Route[] = [
+  {
+    name: "Dashboard",
+    icon: LayoutDashboard,
+    url: "/",
+  },
+  {
+    name: "Ask AI",
+    icon: BotMessageSquare,
+    url: "/ai-chat",
+  },
+  {
+    name: "Chats",
+    icon: MessageCircle,
+    url: "/customer-chats",
+  },
+  {
+    name: "Calls",
+    icon: Headset,
+    url: "/customer-calls",
+  },
+  {
+    name: "Emails",
+    icon: Mail,
+    url: "/customer-emails",
+  },
+  {
+    name: "My Report",
+    icon: NotebookText,
+    url: "/my-report",
+  },
+];
+
+export const routeMap: Map<string, Route[]> = new Map();
+routeMap.set("Admin", adminRoutes);
+routeMap.set("Agent", agentRoutes);

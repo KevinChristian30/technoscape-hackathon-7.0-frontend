@@ -1,16 +1,22 @@
 "use client";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/Sheet";
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "../ui/Button";
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { routes } from "@/lib/routes";
+import { Route, routeMap } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useUser } from "@/providers/UserProvider";
 
 const SidePanelMobile = () => {
   const pathname = usePathname();
+  const { role } = useUser();
+
+  const routes = useMemo<Route[]>((): Route[] => {
+    return routeMap.get(role) ?? [];
+  }, [role]);
 
   return (
     <Sheet>
@@ -32,7 +38,7 @@ const SidePanelMobile = () => {
               href={route.url}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
-                isActive ? "bg-muted text-primary" : " text-muted-foreground",
+                isActive ? "bg-muted text-primary" : " text-muted-foreground"
               )}
             >
               <route.icon className="h-4 w-4" />
