@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/DropdownMenu";
 import { Input } from "@/components/ui/Input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/Sheet";
+import ThemeToggleButton from "@/components/ui/ChangeThemeButton";
 
 const Page = () => {
   return (
@@ -41,6 +42,8 @@ const Page = () => {
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Package2 className="h-6 w-6" />
               <span className="">Acme Inc</span>
+
+              <ThemeToggleButton />
             </Link>
             <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
               <Bell className="h-4 w-4" />
