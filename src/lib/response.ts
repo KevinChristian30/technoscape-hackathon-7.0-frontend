@@ -1,9 +1,13 @@
-import { z } from "zod";
+import { z, ZodTypeAny } from "zod";
 
-const makeResponseDTO = (response: z.AnyZodObject) => {
+export function makeResponseDTO<T extends ZodTypeAny>(dataSchema: T) {
   return z.object({
-    data: response,
+    data: z.any(),
   });
+}
+
+export type ResponseDTO<T> = {
+  data: T;
 };
 
 export default makeResponseDTO;
