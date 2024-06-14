@@ -19,7 +19,7 @@ const Page = () => {
 
   useEffect(() => {
     signOut();
-  }, [signOut]);
+  }, []);
 
   return <div></div>;
 };
