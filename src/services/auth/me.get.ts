@@ -14,6 +14,7 @@ const meResponseValidation = makeResponseDTO(
 export type MeResponse = z.infer<typeof meResponseValidation>;
 
 export const meGet = async (): Promise<MeResponse> => {
-  const res = await http.get<MeResponse>("user");
+  const res = await http.get<MeResponse>("users");
+  console.log(res);
   return meResponseValidation.parse(res.data);
 };
