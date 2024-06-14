@@ -27,10 +27,7 @@ const ProfileButton = () => {
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <Link href={"/settings#profile"}>Profile</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Link href={"/settings#settings"}>Settings</Link>
+            <Link href={"/settings"}>Settings</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
