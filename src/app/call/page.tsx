@@ -1,21 +1,11 @@
 "use client";
-import SidePanelMobile from "@/components/layouts/SidePanelMobile";
+
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { List } from "lucide-react";
+import { ScrollArea } from "@/components/ui/ScrollArea";
+import { Separator } from "@/components/ui/Separator";
 import { Peer } from "peerjs";
-import {
-  AudioHTMLAttributes,
-  DetailedHTMLProps,
-  DetailedReactHTMLElement,
-  LegacyRef,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Page = () => {
   const [peerId, setPeerId] = useState<string | undefined>();
@@ -28,11 +18,12 @@ const Page = () => {
   useEffect(() => {
     const peer = new Peer();
 
-    peer.on("open", (id) => {
+    peer.on("open", (id: any) => {
       setPeerId(id);
+      console.log(id);
     });
 
-    peer.on("call", async (call) => {
+    peer.on("call", async (call: any) => {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
@@ -43,7 +34,7 @@ const Page = () => {
         localVideoRef.current.play();
       }
       call.answer(mediaStream);
-      call.on("stream", (remoteStream) => {
+      call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
@@ -105,7 +96,7 @@ const Page = () => {
         localVideoRef.current.play();
       }
       const call = peerInstance.current.call(targetPeerId, mediaStream);
-      call.on("stream", (remoteStream) => {
+      call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef && remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
@@ -137,12 +128,10 @@ const Page = () => {
         <h2 className="text-xl font-bold mb-4">Queue</h2>
         <ScrollArea className="w-48 rounded-md border">
           {tags.map((tag) => (
-            <>
-              <div key={tag} className="text-sm p-4">
-                {tag}
-              </div>
+            <div key={tag}>
+              <div className="text-sm p-4">{tag}</div>
               <Separator className="my-2" />
-            </>
+            </div>
           ))}
         </ScrollArea>
       </div>
