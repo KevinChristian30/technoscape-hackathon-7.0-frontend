@@ -46,7 +46,7 @@ const CreateAgentForm = () => {
       });
       router.push("/agents");
     }
-  }, [status]);
+  }, [status, error, router]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutate(values);

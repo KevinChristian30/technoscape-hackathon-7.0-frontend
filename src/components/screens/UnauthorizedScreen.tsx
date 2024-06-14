@@ -10,7 +10,7 @@ const UnauthorizedScreen = () => {
 
   useEffect(() => {
     router.back();
-  }, []);
+  }, [router]);
 
   return (
     <div className="w-screen h-screen grid place-items-center absolute top-0 left-0">
