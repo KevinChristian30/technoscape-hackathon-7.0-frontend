@@ -146,7 +146,7 @@ function Page() {
                     <Image
                       alt="Ad Or Company Logo"
                       className="w-full rounded-md object-fit"
-                      height="150"
+                      height="100"
                       src="/banner.png"
                       width="300"
                     />
