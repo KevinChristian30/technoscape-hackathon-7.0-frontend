@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/Input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert"
 import { RocketIcon } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/Separator"
 
 
 export default function Dashboard() {
