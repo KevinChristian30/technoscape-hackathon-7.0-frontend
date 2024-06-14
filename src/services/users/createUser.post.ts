@@ -9,5 +9,5 @@ export interface CreateUserPayload {
 export const createUserPost = async (
   payload: CreateUserPayload,
 ): Promise<void> => {
-  await http.post<void>("user", payload);
+  await http.post<void>("users", payload);
 };

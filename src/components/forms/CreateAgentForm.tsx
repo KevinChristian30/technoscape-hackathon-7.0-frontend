@@ -35,7 +35,7 @@ const CreateAgentForm = () => {
     if (status === "error") {
       toast({
         title: "Something went wrong",
-        description: error.response?.data.errors[0] ?? "Failed creating agent",
+        description: error.response?.data?.errors[0] ?? "Failed creating agent",
         variant: "destructive",
       });
     } else if (status === "success") {
