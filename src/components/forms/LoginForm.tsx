@@ -77,6 +77,7 @@ const LoginForm = () => {
           name="email"
           label="Email"
           placeHolder="jon.doe@gmail.com"
+          type="email"
         />
 
         <MHDTextField

@@ -1,7 +1,11 @@
-import PageLayout from "@/components/layouts/PageLayout";
+import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 
 const Page = () => {
-  return <PageLayout title="Dashboard"></PageLayout>;
+  return (
+    <PageLayout>
+      <PageLayoutHeader>Dashboard</PageLayoutHeader>
+    </PageLayout>
+  );
 };
 
 export default Page;
