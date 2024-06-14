@@ -16,7 +16,7 @@ const CurrentUserContext = createContext<UserContextData>({
   email: "",
   id: "",
   name: "",
-  role: ""
+  role: "",
 });
 
 export function useUser() {
@@ -24,7 +24,7 @@ export function useUser() {
 }
 
 const UserProvider = ({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
@@ -35,7 +35,7 @@ const UserProvider = ({
       email: data ? data.data.email : "",
       id: data ? data.data.id : "",
       name: data ? data.data.name : "",
-      role: data ? data.data.role : ""
+      role: data ? data.data.role : "",
     };
   }, [data]);
 

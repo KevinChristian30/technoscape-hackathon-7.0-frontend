@@ -5,5 +5,5 @@ export const useMe = () =>
   useQuery({
     queryKey: ["meGet"],
     queryFn: meGet,
-    retry: 1
+    retry: 1,
   });

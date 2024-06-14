@@ -15,7 +15,7 @@ import constants from "@/lib/constants";
 
 const formSchema = z.object({
   email: z.string().min(1),
-  password: z.string().min(1)
+  password: z.string().min(1),
 });
 
 const LoginForm = () => {
@@ -26,8 +26,8 @@ const LoginForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: ""
-    }
+      password: "",
+    },
   });
 
   const { mutate, error, status, data } = useLogin();
@@ -37,17 +37,17 @@ const LoginForm = () => {
       toast({
         title: "Something went wrong",
         description: error.response?.data.errors[0] ?? "Failed logging in",
-        variant: "destructive"
+        variant: "destructive",
       });
     } else if (status === "success") {
       cookies.set(constants.cookie.token, data.data.token, {
-        expires: 1
+        expires: 1,
       });
 
       toast({
         title: "Success",
         description: "Logged in, redirecting you soon",
-        variant: "success"
+        variant: "success",
       });
       form.reset();
       router.push("/");

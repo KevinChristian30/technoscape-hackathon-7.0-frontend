@@ -4,7 +4,7 @@ import Navbar from "@/components/layouts/Navbar";
 import UserProvider from "@/providers/UserProvider";
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

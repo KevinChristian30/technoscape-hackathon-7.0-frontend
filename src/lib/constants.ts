@@ -1,7 +1,7 @@
 const constants = {
   cookie: {
-    token: "token"
-  }
+    token: "token",
+  },
 };
 
 export default constants;

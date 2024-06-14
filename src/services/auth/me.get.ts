@@ -7,8 +7,8 @@ const meResponseValidation = makeResponseDTO(
     email: z.string(),
     id: z.string(),
     name: z.string(),
-    role: z.string()
-  })
+    role: z.string(),
+  }),
 );
 
 export type MeResponse = z.infer<typeof meResponseValidation>;

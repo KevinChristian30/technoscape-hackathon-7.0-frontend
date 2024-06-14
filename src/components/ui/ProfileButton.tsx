@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuItem,
-  DropdownMenu
+  DropdownMenu,
 } from "./DropdownMenu";
 import { Button } from "./Button";
 import { CircleUser } from "lucide-react";

@@ -4,7 +4,7 @@ import constants from "./constants";
 import { constructBearerToken } from "./auth";
 
 const http = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
 
 http.interceptors.request.use(
@@ -17,7 +17,7 @@ http.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 export default http;

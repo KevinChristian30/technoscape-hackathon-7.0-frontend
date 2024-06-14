@@ -2,7 +2,7 @@ import {
   BarChart2,
   LayoutDashboard,
   LucideIcon,
-  UsersRound
+  UsersRound,
 } from "lucide-react";
 
 export interface Route {
@@ -15,16 +15,16 @@ export const routes: Route[] = [
   {
     name: "Dashboard",
     icon: LayoutDashboard,
-    url: "/"
+    url: "/",
   },
   {
     name: "Agents",
     icon: UsersRound,
-    url: "/agents"
+    url: "/agents",
   },
   {
     name: "Analytics",
     icon: BarChart2,
-    url: "/analytics"
-  }
+    url: "/analytics",
+  },
 ];
