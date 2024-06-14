@@ -2,7 +2,7 @@ import http from "@/lib/axios";
 import { z } from "zod";
 
 const meResponseValidation = z.object({
-  sub: z.string(),
+  sub: z.string()
 });
 
 export type MeResponse = z.infer<typeof meResponseValidation>;

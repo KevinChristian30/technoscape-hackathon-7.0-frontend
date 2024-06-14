@@ -1,11 +1,9 @@
-
 import Title from "@/components/layouts/Title";
 import SidePanel from "../../components/layouts/SidePanel";
 import Navbar from "@/components/layouts/Navbar";
 
-
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -32,5 +30,4 @@ export default function RootLayout({
       </div>
     </div>
   );
-
 }
