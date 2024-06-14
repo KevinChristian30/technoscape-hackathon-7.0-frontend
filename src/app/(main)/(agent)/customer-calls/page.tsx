@@ -1,21 +1,13 @@
 "use client";
 
 import MHDError from "@/components/domain/MHDError";
-import MHDVideo from "@/components/domain/MHDVideo";
+import MHDVideoCall from "@/components/domain/MHDVideoCall";
 import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Separator } from "@/components/ui/Separator";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCallQueue } from "@/composables/queue/query/useCallQueue";
-import {
-  Mic,
-  MicOff,
-  ScreenShare,
-  Unplug,
-  Video,
-  VideoOff,
-} from "lucide-react";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,6 +17,9 @@ const Page = () => {
   const currentPeer = useRef<RTCPeerConnection | null>(null);
   const remoteAudioRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const localMediaStream = useRef<MediaStream | null>(null);
+  const remoteMediaStream = useRef<MediaStream | null>(null);
 
   const [connected, setConnected] = useState<boolean>(false);
   const [cameraOn, setCameraOn] = useState<boolean>(false);
@@ -45,12 +40,13 @@ const Page = () => {
         video: cameraOn,
         audio: micOn,
       });
+      localMediaStream.current = mediaStream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = mediaStream;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      call.answer(mediaStream);
+      call.answer(localMediaStream.current);
       call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
@@ -117,13 +113,14 @@ const Page = () => {
       video: true,
       audio: true,
     });
+    localMediaStream.current = mediaStream;
     if (peerInstance.current && id) {
       if (localVideoRef.current) {
-        localVideoRef.current.srcObject = mediaStream;
+        localVideoRef.current.srcObject = localMediaStream.current;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      const call = peerInstance.current.call(id, mediaStream);
+      const call = peerInstance.current.call(id, localMediaStream.current);
       call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef && remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
@@ -146,6 +143,20 @@ const Page = () => {
       return s.track?.kind == videoTrack.kind;
     });
     sender?.replaceTrack(videoTrack);
+  };
+
+  const toggleCamera = () => {
+    setCameraOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getVideoTracks()[0].enabled = cameraOn;
+    }
+  };
+
+  const toggleMic = () => {
+    setMicOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getAudioTracks()[0].enabled = micOn;
+    }
   };
 
   return (
@@ -177,79 +188,20 @@ const Page = () => {
           </ScrollArea>
         </div>
 
-        <div className="w-full relative">
-          <div className="w-full">
-            <MHDVideo
-              reference={remoteAudioRef}
-              className="bg-muted-foreground w-full h-[500px] rounded-md"
-            />
-          </div>
-          <div className="absolute bottom-[16px] right-[16px]">
-            <MHDVideo
-              reference={localVideoRef}
-              className="bg-muted w-36 h-36 rounded-md"
-            />
-          </div>
-        </div>
+        <MHDVideoCall
+          cleanup={cleanup}
+          localRef={localVideoRef}
+          remoteRef={remoteAudioRef}
+          onShareScreenClick={shareScreenOnClick}
+          peerInstance={peerInstance}
+          connected={connected}
+          cameraOn={cameraOn}
+          toggleCamera={toggleCamera}
+          micOn={micOn}
+          setMicOn={setMicOn}
+          toggleMic={toggleMic}
+        />
       </div>
-
-      <div className="h-4"></div>
-
-      {connected && (
-        // <div className="flex gap-4 justify-end">
-        //   {cameraOn ? (
-        //     <Button
-        //       variant={"default"}
-        //       size={"icon"}
-        //       onClick={() => setCameraOn(false)}
-        //     >
-        //       <Video />
-        //     </Button>
-        //   ) : (
-        //     <Button
-        //       variant={"outline"}
-        //       size={"icon"}
-        //       className="border border-primary text-primary hover:text-primary"
-        //       onClick={() => setCameraOn(true)}
-        //     >
-        //       <VideoOff />
-        //     </Button>
-        //   )}
-        //   {micOn ? (
-        //     <Button
-        //       variant={"default"}
-        //       size={"icon"}
-        //       onClick={() => setMicOn(false)}
-        //     >
-        //       <Mic />
-        //     </Button>
-        //   ) : (
-        //     <Button
-        //       variant={"outline"}
-        //       size={"icon"}
-        //       className="border border-primary text-primary hover:text-primary"
-        //       onClick={() => setMicOn(true)}
-        //     >
-        //       <MicOff />
-        //     </Button>
-        //   )}
-        <div className="flex gap-4 justify-end">
-          <Button onClick={shareScreenOnClick} className="flex gap-2">
-            <ScreenShare className="w-4 h-4" />
-            Share Screen
-          </Button>
-          <Button
-            variant={"destructive"}
-            onClick={() => {
-              peerInstance.current?.disconnect;
-              cleanup();
-            }}
-            className="flex gap-2"
-          >
-            <Unplug className="w-4 h-4" /> Disconnect
-          </Button>
-        </div>
-      )}
     </PageLayout>
   );
 };
