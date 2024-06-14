@@ -12,7 +12,7 @@ const UnathenticatedScreen = () => {
 
   useEffect(() => {
     cookie.remove(constants.cookie.token);
-  }, []);
+  }, [cookie]);
 
   return (
     <div className="w-screen h-screen grid place-items-center">

@@ -31,6 +31,6 @@ const PageLayoutContent = React.forwardRef<
     {...props}
   />
 ));
-PageLayoutHeader.displayName = "PageLayoutHeader";
+PageLayoutContent.displayName = "PageLayoutContent";
 
 export { PageLayout, PageLayoutHeader, PageLayoutContent };

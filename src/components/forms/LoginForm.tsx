@@ -52,7 +52,7 @@ const LoginForm = () => {
       form.reset();
       router.push("/");
     }
-  }, [status]);
+  }, [status, cookies, data, error, form, router]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutate(values);
