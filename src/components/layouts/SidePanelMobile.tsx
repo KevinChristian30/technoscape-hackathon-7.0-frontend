@@ -1,11 +1,17 @@
-import { Input } from "@/components/ui/Input";
+"use client";
+
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/Sheet";
 import React from "react";
 import { Button } from "../ui/Button";
-import { Home, LineChart, Menu, Mail, Package2, Users } from "lucide-react";
+import { Menu } from "lucide-react";
 import Link from "next/link";
+import { routes } from "@/lib/routes";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 const SidePanelMobile = () => {
+  const pathname = usePathname();
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -15,44 +21,25 @@ const SidePanelMobile = () => {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col">
-        <nav className="grid gap-2 text-lg font-medium">
-          <Link
-            href="#"
-            className="flex items-center gap-2 text-lg font-semibold"
-          >
-            <Package2 className="h-6 w-6" />
-            <span className="sr-only">Acme Inc</span>
-          </Link>
-          <Link
-            href="#"
-            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-5 w-5" />
-            Home
-          </Link>
+        {routes.map((route) => {
+          const isActive =
+            (pathname.includes(route.url) && route.url.length > 1) ||
+            pathname === route.url;
 
-          <Link
-            href="#"
-            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-          >
-            <Mail className="h-5 w-5" />
-            Email
-          </Link>
-          <Link
-            href="#"
-            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-          >
-            <Users className="h-5 w-5" />
-            Customers
-          </Link>
-          <Link
-            href="#"
-            className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-          >
-            <LineChart className="h-5 w-5" />
-            Analytics
-          </Link>
-        </nav>
+          return (
+            <Link
+              key={route.name}
+              href={route.url}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                isActive ? "bg-muted text-primary" : " text-muted-foreground"
+              )}
+            >
+              <route.icon className="h-4 w-4" />
+              {route.name}
+            </Link>
+          );
+        })}
       </SheetContent>
     </Sheet>
   );
