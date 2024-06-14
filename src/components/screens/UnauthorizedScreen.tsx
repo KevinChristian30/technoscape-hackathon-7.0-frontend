@@ -3,19 +3,17 @@
 import Image from "next/image";
 import React, { useEffect } from "react";
 import { Button } from "../ui/Button";
-import Link from "next/link";
-import { useCookies } from "next-client-cookies";
-import constants from "@/lib/constants";
+import { useRouter } from "next/navigation";
 
-const UnathenticatedScreen = () => {
-  const cookie = useCookies();
+const UnauthorizedScreen = () => {
+  const router = useRouter();
 
   useEffect(() => {
-    cookie.remove(constants.cookie.token);
-  }, [cookie]);
+    router.back();
+  }, [router]);
 
   return (
-    <div className="w-screen h-screen grid place-items-center">
+    <div className="w-screen h-screen grid place-items-center absolute top-0 left-0">
       <div className="flex flex-col items-center justify-center gap-8">
         <div className="flex flex-col items-center justify-center">
           <Image
@@ -25,14 +23,19 @@ const UnathenticatedScreen = () => {
             height={200}
             priority
           />
-          <h1 className="text-2xl">Session Expired</h1>
+          <h1 className="text-2xl">You are unauthorized to view this page</h1>
         </div>
-        <Link href={"/login"}>
-          <Button size={"lg"}>Sign In</Button>
-        </Link>
+        <Button
+          size={"lg"}
+          onClick={() => {
+            router.back();
+          }}
+        >
+          Go Back
+        </Button>
       </div>
     </div>
   );
 };
 
-export default UnathenticatedScreen;
+export default UnauthorizedScreen;

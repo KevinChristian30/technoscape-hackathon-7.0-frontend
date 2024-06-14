@@ -52,7 +52,7 @@ const LoginForm = () => {
       form.reset();
       router.push("/");
     }
-  }, [status]);
+  }, [status, cookies, data, error, form, router]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutate(values);
@@ -77,6 +77,7 @@ const LoginForm = () => {
           name="email"
           label="Email"
           placeHolder="jon.doe@gmail.com"
+          type="email"
         />
 
         <MHDTextField

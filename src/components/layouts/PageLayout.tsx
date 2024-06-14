@@ -1,20 +1,36 @@
+import { cn } from "@/lib/utils";
 import React, { ReactNode } from "react";
-import { Button } from "../ui/Button";
 
-interface Props {
-  title: string;
-  children?: ReactNode | ReactNode[];
-}
+const PageLayoutHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-lg font-semibold md:text-2xl", className)}
+    {...props}
+  />
+));
+PageLayoutHeader.displayName = "PageLayoutHeader";
 
-const PageLayout = ({ title, children }: Props) => {
-  return (
-    <>
-      <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">{title}</h1>
-      </div>
-      <div className="flex flex-col items-start justify-center">{children}</div>
-    </>
-  );
-};
+const PageLayout = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn(className)} {...props} />
+));
+PageLayout.displayName = "PageLayout";
 
-export default PageLayout;
+const PageLayoutContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(className)}
+    {...props}
+  />
+));
+PageLayoutContent.displayName = "PageLayoutContent";
+
+export { PageLayout, PageLayoutHeader, PageLayoutContent };
