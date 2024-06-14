@@ -15,7 +15,7 @@ const ThemeToggleButton = () => {
     } else {
       setTheme("light");
     }
-  }, []);
+  }, [theme, setTheme]);
 
   const toggleTheme = () => {
     if (theme === "dark") {

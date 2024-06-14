@@ -9,6 +9,7 @@
     "lint": "next lint",
     "format": "prettier --write --ignore-path .gitignore ."
   },
+  "type": "module",
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
     "@radix-ui/react-avatar": "^1.0.4",
