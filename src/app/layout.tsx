@@ -10,11 +10,11 @@ import { TopLoaderProvider } from "@/providers/TopLoaderProvider";
 const font = Roboto({ weight: "400", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Project Name",
+  title: "MyHelpdesk"
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
