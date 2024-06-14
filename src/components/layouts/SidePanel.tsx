@@ -1,41 +1,43 @@
-import { Badge, Home, LineChart, Mail, ShoppingCart, Users } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+"use client";
+
+import { Role, Route, routeMap } from "@/lib/routes";
+import { cn } from "@/lib/utils";
+import { useUser } from "@/providers/UserProvider";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useMemo } from "react";
 
 const SidePanel = () => {
-    return (
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-                <Home className="h-4 w-4" />
-                Home
-            </Link>
+  const pathname = usePathname();
+  const { role } = useUser();
 
-            <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-            >
-                <Mail className="h-4 w-4" />
-                Email
-            </Link>
-            <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-                <Users className="h-4 w-4" />
-                Customers
-            </Link>
-            <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-                <LineChart className="h-4 w-4" />
-                Analytics
-            </Link>
-        </nav>
-    )
-}
+  const routes = useMemo<Route[]>((): Route[] => {
+    return routeMap.get(role) ?? [];
+  }, [role]);
 
-export default SidePanel
+  return (
+    <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-2">
+      {routes.map((route) => {
+        const isActive =
+          (pathname.includes(route.url) && route.url.length > 1) ||
+          pathname === route.url;
+
+        return (
+          <Link
+            key={route.name}
+            href={route.url}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+              isActive ? "bg-muted text-primary" : " text-muted-foreground"
+            )}
+          >
+            <route.icon className="h-4 w-4" />
+            {route.name}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+};
+
+export default SidePanel;
