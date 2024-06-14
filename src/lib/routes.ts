@@ -67,6 +67,11 @@ export const agentRoutes: Route[] = [
   },
 ];
 
+export enum Role {
+  ADMIN = "Admin",
+  AGENT = "Agent",
+}
+
 export const routeMap: Map<string, Route[]> = new Map();
-routeMap.set("Admin", adminRoutes);
-routeMap.set("Agent", agentRoutes);
+routeMap.set(Role.ADMIN.toString(), adminRoutes);
+routeMap.set(Role.AGENT.toString(), agentRoutes);

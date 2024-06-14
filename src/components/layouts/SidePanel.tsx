@@ -1,6 +1,6 @@
 "use client";
 
-import { Route, routeMap } from "@/lib/routes";
+import { Role, Route, routeMap } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/providers/UserProvider";
 import Link from "next/link";
