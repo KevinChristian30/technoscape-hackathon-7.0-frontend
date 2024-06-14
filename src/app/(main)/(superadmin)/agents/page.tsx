@@ -1,4 +1,3 @@
-import CreateAgentForm from "@/components/forms/CreateAgentForm";
 import {
   PageLayout,
   PageLayoutContent,
@@ -23,9 +22,7 @@ const Page = () => {
 
       <div className="h-8"></div>
 
-      <PageLayoutContent>
-        <CreateAgentForm />
-      </PageLayoutContent>
+      <PageLayoutContent></PageLayoutContent>
     </PageLayout>
   );
 };
