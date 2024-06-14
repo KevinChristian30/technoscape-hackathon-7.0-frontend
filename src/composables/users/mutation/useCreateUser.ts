@@ -1,7 +1,7 @@
 import {
   CreateUserPayload,
   createUserPost,
-} from "@/services/users/createUserPost";
+} from "@/services/users/createUser.post";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 

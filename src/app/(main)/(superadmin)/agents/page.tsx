@@ -3,6 +3,7 @@ import {
   PageLayoutContent,
   PageLayoutHeader,
 } from "@/components/layouts/PageLayout";
+import AgentsTable from "@/components/tables/AgentsTable";
 import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +23,9 @@ const Page = () => {
 
       <div className="h-8"></div>
 
-      <PageLayoutContent></PageLayoutContent>
+      <PageLayoutContent>
+        <AgentsTable />
+      </PageLayoutContent>
     </PageLayout>
   );
 };
