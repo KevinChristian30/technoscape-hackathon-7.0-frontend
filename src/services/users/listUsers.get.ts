@@ -1,22 +1,27 @@
 import { PaginationRequestDTO } from "@/dtos/paginationRequestDTO";
+import {
+  createPaginationResponseDTOValidation,
+  PaginationResponseDTO,
+} from "@/dtos/paginationResponseDTO";
 import http from "@/lib/axios";
-import makeResponseDTO from "@/lib/response";
 import { z } from "zod";
 
-const userListResponseValidation = makeResponseDTO(
-  z.object({
-    agents: z.array(
-      z.object({
-        email: z.string(),
-        id: z.string(),
-        name: z.string(),
-        role: z.string(),
-      })
-    ),
-  })
-);
+const userListResponseValidation = z.object({
+  email: z.string(),
+  id: z.string(),
+  name: z.string(),
+  role: z.string(),
+});
 
 export type UserListResponse = z.infer<typeof userListResponseValidation>;
+
+const paginationResponseDTOValidation = createPaginationResponseDTOValidation(
+  userListResponseValidation
+);
+
+export type ListUsersPaginationResponse = z.infer<
+  typeof paginationResponseDTOValidation
+>;
 
 export class UsersPaginationRequestDTO extends PaginationRequestDTO {
   constructor(
@@ -34,7 +39,7 @@ export class UsersPaginationRequestDTO extends PaginationRequestDTO {
 
 export const listUsersGet = async (
   dto: UsersPaginationRequestDTO
-): Promise<UserListResponse> => {
-  const res = await http.get<UserListResponse>(dto.append("users"));
-  return userListResponseValidation.parse(res.data);
+): Promise<PaginationResponseDTO<UserListResponse>> => {
+  const res = await http.get<ListUsersPaginationResponse>(dto.append("agents"));
+  return paginationResponseDTOValidation.parse(res.data);
 };

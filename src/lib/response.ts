@@ -1,13 +1,13 @@
 import { z, ZodTypeAny } from "zod";
 
-export function makeResponseDTO<T extends ZodTypeAny>(dataSchema: T) {
+export function makeResponseDTO<T>(dataSchema: T) {
   return z.object({
-    data: z.array(dataSchema),
+    data: z.any(),
   });
 }
 
 export type ResponseDTO<T> = {
-  data: T[];
+  data: T;
 };
 
 export default makeResponseDTO;

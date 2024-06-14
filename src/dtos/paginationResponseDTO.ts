@@ -5,9 +5,11 @@ export function createPaginationResponseDTOValidation<T extends ZodTypeAny>(
 ) {
   return z.object({
     data: z.array(dataSchema),
+    totalCount: z.number()
   });
 }
 
 export type PaginationResponseDTO<T> = {
   data: T[];
+  totalCount: number;
 };
