@@ -7,8 +7,10 @@ const Navbar = () => {
   return (
     <>
       <SidePanelMobile />
-      <ThemeToggleButton />
-      <ProfileButton />
+      <div className="flex gap-2">
+        <ThemeToggleButton />
+        <ProfileButton />
+      </div>
     </>
   );
 };
