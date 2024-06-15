@@ -100,7 +100,7 @@ const EmailTable = () => {
   return (
     <div className="w-full flex h-full">
       <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
-        <DialogContent>
+        <DialogContent >
           <DialogHeader>
             <DialogTitle>{selectedEmail?.subject}</DialogTitle>
             <DialogDescription>

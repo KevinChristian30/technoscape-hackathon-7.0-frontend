@@ -1,4 +1,4 @@
-import EmailTable from "@/components/domain/email/EmailTable";
+import EmailSection from "@/components/domain/email/EmailSection";
 import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 import React from "react";
 
@@ -10,7 +10,7 @@ const Page = () => {
       </PageLayoutHeader>
 
       <div className="h-8"></div>
-      <EmailTable />
+      <EmailSection />
     </PageLayout>
   );
 };
