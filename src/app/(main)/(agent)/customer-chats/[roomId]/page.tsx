@@ -82,7 +82,7 @@ function Page({ params }: PageProps) {
   useEffect(() => {
     {
       if (socket) {
-        socket.emit('join-room-agent', roomId)
+        socket.emit('join-room-agent', { roomId, name })
         toast({
           title: "Connected",
           description: "You are now connected to the chat",

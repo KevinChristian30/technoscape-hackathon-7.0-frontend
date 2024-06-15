@@ -38,7 +38,6 @@ const getColumns = (): ColumnDef<CustomerListResponse>[] => {
         {
             accessorKey: "customerEmail",
             header: "Email",
-            cell: ({ row }) => <Badge>{ }</Badge>,
         },
         {
             accessorKey: "state",
