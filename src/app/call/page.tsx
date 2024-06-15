@@ -18,6 +18,7 @@ import { createQueuePost } from "@/services/queue/createQueue.post";
 import useSocket from "@/socket/useSocket";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Peer } from "peerjs";
+import { disconnect } from "process";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -100,7 +101,9 @@ const Page = () => {
       });
     });
 
-    peer.on("disconnected", () => { });
+    peer.on("disconnected", () => {
+      console.log("Disconnected");
+    });
 
     peer.on("close", () => {
       cleanup();

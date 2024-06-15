@@ -18,11 +18,6 @@ export interface Route {
 
 export const adminRoutes: Route[] = [
   {
-    name: "Dashboard",
-    icon: LayoutDashboard,
-    url: "/",
-  },
-  {
     name: "Agents",
     icon: UsersRound,
     url: "/agents",
@@ -35,11 +30,6 @@ export const adminRoutes: Route[] = [
 ];
 
 export const agentRoutes: Route[] = [
-  {
-    name: "Dashboard",
-    icon: LayoutDashboard,
-    url: "/",
-  },
   {
     name: "Ask AI",
     icon: BotMessageSquare,
