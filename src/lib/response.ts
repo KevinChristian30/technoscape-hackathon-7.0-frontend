@@ -1,6 +1,6 @@
 import { z, ZodTypeAny } from "zod";
 
-export function makeResponseDTO<T>(dataSchema: T) {
+export function makeResponseDTO<T extends ZodTypeAny>(dataSchema: T) {
   return z.object({
     data: z.any(),
   });
