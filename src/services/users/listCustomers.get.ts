@@ -13,7 +13,7 @@ const customerListResponseValidation = z.object({
   customerEmail: z.string(),
   state: z.string(),
   agentId: z.string().nullable(),
-  createdAt: z.date(),
+  createdAt: z.string(),
 });
 
 export type CustomerListResponse = z.infer<typeof customerListResponseValidation>;

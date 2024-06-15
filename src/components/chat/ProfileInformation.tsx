@@ -4,15 +4,17 @@ import { ChevronRight, Mail } from 'lucide-react'
 
 interface props {
     name: string,
-    email: string
+    email: string,
+    title?: string
+    agent?: boolean
 }
 
 
-const ProfileInformation = ({ name, email }: props) => {
+const ProfileInformation = ({ name, email, agent, title }: props) => {
     return (
         <Alert>
             <AlertTitle>
-                <div className="font-lg">Customer Profile Information</div>
+                <div className="font-lg">{title ? title : "Customer Profile Information"}</div>
             </AlertTitle>
 
             <div className="font-md">
@@ -24,9 +26,11 @@ const ProfileInformation = ({ name, email }: props) => {
             </div>
             <div className="font-md">
                 <span className="flex items-center gap-2">
-                    Email
-                    <Mail className="h-4 w-4 text-muted-foreground" />{" : "}
-                    {email}
+                    {agent ? "" : <>
+                        Email
+                        <Mail className="h-4 w-4 text-muted-foreground" />{" : "}
+                        {email}
+                    </>}
                 </span>
             </div>
         </Alert>

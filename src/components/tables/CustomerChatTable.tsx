@@ -23,14 +23,38 @@ import MHDTextField from "../domain/MHDTextField";
 import { Badge } from "../ui/Badge";
 import { CustomerListResponse, CustomersPaginationRequestDTO } from "@/services/users/listCustomers.get";
 import { useCustomers } from "@/composables/users/query/useCustomers";
-import { log } from "console";
+import Link from "next/link";
+import axios from "axios";
+import http from "@/lib/axios";
+
+
+interface propsBtn {
+    roomId: string;
+}
+
+const CustomButton = (roomId: propsBtn) => {
+    const router = useRouter();
+
+    function handleClick() {
+
+
+        const res = {
+            customerAgentRoomId: roomId.roomId,
+        }
+        http.put(`rooms/customer-agent/accept`, res)
+        router.push(`/customer-chats/${roomId.roomId}`);
+    }
+
+    return (
+        <Button onClick={handleClick}>
+            Chat
+        </Button>
+    );
+}
+
 
 const getColumns = (): ColumnDef<CustomerListResponse>[] => {
     return [
-        {
-            accessorKey: "roomId",
-            header: "Room ID",
-        },
         {
             accessorKey: "customerName",
             header: "Name",
@@ -38,15 +62,16 @@ const getColumns = (): ColumnDef<CustomerListResponse>[] => {
         {
             accessorKey: "customerEmail",
             header: "Email",
-            cell: ({ row }) => <Badge>{ }</Badge>,
         },
         {
             accessorKey: "state",
             header: "State",
+            cell: ({ row }) => row.original.state == "PENDING" ? <Badge className="bg-primary">{row.original.state}</Badge> : <Badge color="blue">{row.original.state}</Badge>,
         },
         {
-            accessorKey: "agentId",
-            header: "Agent Id",
+            accessorKey: "roomId",
+            header: "Action",
+            cell: ({ row }) => <CustomButton roomId={row.original.roomId} />,
         },
         {
             accessorKey: "createdAt",
@@ -103,8 +128,10 @@ const CustomerChatTable = ({ refresh }: props) => {
     }
 
     if (status === "error") {
+        console.log(error);
         return <MHDError />;
     }
+
 
     return (
         <div>
