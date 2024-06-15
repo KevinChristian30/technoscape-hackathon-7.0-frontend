@@ -19,13 +19,12 @@ const Page = () => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const localMediaStream = useRef<MediaStream | null>(null);
-  const remoteMediaStream = useRef<MediaStream | null>(null);
 
   const [connected, setConnected] = useState<boolean>(false);
   const [cameraOn, setCameraOn] = useState<boolean>(false);
   const [micOn, setMicOn] = useState<boolean>(false);
 
-  const { data, error, status } = useCallQueue();
+  const { data, status } = useCallQueue();
 
   useEffect(() => {
     const peer = new Peer();
@@ -57,12 +56,9 @@ const Page = () => {
       });
     });
 
-    peer.on("disconnected", () => {
-      console.log("Peer disconnected");
-    });
+    peer.on("disconnected", () => {});
 
     peer.on("close", () => {
-      console.log("Peer connection closed");
       cleanup();
     });
     peerInstance.current = peer;

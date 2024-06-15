@@ -1,19 +1,26 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Separator } from "@/components/ui/Separator";
+import MHDError from "@/components/domain/MHDError";
+import MHDVideoCall from "@/components/domain/MHDVideoCall";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useCallQueue } from "@/composables/queue/query/useCallQueue";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 
 const Page = () => {
   const [peerId, setPeerId] = useState<string | undefined>();
-  const [targetPeerId, setTargetPeerId] = useState<string | undefined>();
   const peerInstance = useRef<Peer | null>(null);
   const currentPeer = useRef<RTCPeerConnection | null>(null);
   const remoteAudioRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const localMediaStream = useRef<MediaStream | null>(null);
+
+  const [connected, setConnected] = useState<boolean>(false);
+  const [cameraOn, setCameraOn] = useState<boolean>(false);
+  const [micOn, setMicOn] = useState<boolean>(false);
+
+  const { data, status } = useCallQueue();
 
   useEffect(() => {
     const peer = new Peer();
@@ -25,30 +32,29 @@ const Page = () => {
 
     peer.on("call", async (call: any) => {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
+        video: cameraOn,
+        audio: micOn,
       });
+      localMediaStream.current = mediaStream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = mediaStream;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      call.answer(mediaStream);
+      call.answer(localMediaStream.current);
       call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
           currentPeer.current = call.peerConnection;
+          setConnected(true);
         }
       });
     });
 
-    peer.on("disconnected", () => {
-      console.log("Peer disconnected");
-    });
+    peer.on("disconnected", () => {});
 
     peer.on("close", () => {
-      console.log("Peer connection closed");
       cleanup();
     });
     peerInstance.current = peer;
@@ -82,26 +88,30 @@ const Page = () => {
       currentPeer.current.close();
       currentPeer.current = null;
     }
+
+    setConnected(false);
   };
 
-  const callOnclick = async () => {
+  const callOnclick = async (id: string) => {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    if (peerInstance.current && targetPeerId) {
+    localMediaStream.current = mediaStream;
+    if (peerInstance.current && id) {
       if (localVideoRef.current) {
-        localVideoRef.current.srcObject = mediaStream;
+        localVideoRef.current.srcObject = localMediaStream.current;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      const call = peerInstance.current.call(targetPeerId, mediaStream);
+      const call = peerInstance.current.call(id, localMediaStream.current);
       call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef && remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
           currentPeer.current = call.peerConnection;
           call.peerConnection.iceConnectionState;
+          setConnected(true);
         }
       });
     }
@@ -119,40 +129,38 @@ const Page = () => {
     sender?.replaceTrack(videoTrack);
   };
 
-  const tags = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-  );
+  const toggleCamera = () => {
+    setCameraOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getVideoTracks()[0].enabled = cameraOn;
+    }
+  };
+
+  const toggleMic = () => {
+    setMicOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getAudioTracks()[0].enabled = micOn;
+    }
+  };
+
   return (
-    <>
-      <div className="w-1/4 bg-white p-4 overflow-auto">
-        <h2 className="text-xl font-bold mb-4">Queue</h2>
-        <ScrollArea className="w-48 rounded-md border">
-          {tags.map((tag) => (
-            <div key={tag}>
-              <div className="text-sm p-4">{tag}</div>
-              <Separator className="my-2" />
-            </div>
-          ))}
-        </ScrollArea>
+    <div className="grid place-items-center h-screen">
+      <div className="">
+        <MHDVideoCall
+          cleanup={cleanup}
+          localRef={localVideoRef}
+          remoteRef={remoteAudioRef}
+          onShareScreenClick={shareScreenOnClick}
+          peerInstance={peerInstance}
+          connected={connected}
+          cameraOn={cameraOn}
+          toggleCamera={toggleCamera}
+          micOn={micOn}
+          setMicOn={setMicOn}
+          toggleMic={toggleMic}
+        />
       </div>
-      <Input type="text" onChange={(e) => setTargetPeerId(e.target.value)} />
-      <Button onClick={callOnclick}>Call</Button>
-      <Button onClick={shareScreenOnClick}>Share Screen</Button>
-      <Button
-        onClick={() => {
-          peerInstance.current?.disconnect;
-          cleanup();
-        }}
-      >
-        Disconnect
-      </Button>
-      <div>
-        <video ref={remoteAudioRef} />
-      </div>
-      <div>
-        <video ref={localVideoRef} />
-      </div>
-    </>
+    </div>
   );
 };
 

@@ -3,5 +3,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <main className="flex h-screen">{children}</main>;
+  return <main className="h-screen w-screen">{children}</main>;
 }
