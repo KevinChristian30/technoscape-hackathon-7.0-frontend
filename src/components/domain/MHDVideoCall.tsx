@@ -110,6 +110,10 @@ const MHDVideoCall = ({
                   name: currentQueue.customerName,
                   peerId: currentQueue.peerJsID,
                 });
+                peerInstance.current?.emit(
+                  "disconnected",
+                  currentQueue.peerJsID
+                );
                 socket.emit("delete-post");
                 peerInstance?.current?.disconnect();
                 peerInstance.current = null;

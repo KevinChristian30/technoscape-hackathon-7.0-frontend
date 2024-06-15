@@ -20,6 +20,9 @@ import useSocket from "@/socket/useSocket";
 import { useUser } from "@/providers/UserProvider";
 import { toast } from "@/components/ui/hooks/useToast";
 import { ScrollArea } from "@/components/ui/ScrollArea";
+import FinishedChatButton from "@/components/ui/FinishChatButton";
+import http from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 interface CustomerAgentChatDto {
   roomId: string
@@ -43,6 +46,8 @@ function Page({ params }: PageProps) {
   const [history, setHistory] = useState<CustomerAgentChatDto[]>([]);
 
   const { id, name } = useUser();
+  const router = useRouter();
+
 
   const { roomId } = params;
   const socket = useSocket({ serverUrl });
@@ -74,6 +79,7 @@ function Page({ params }: PageProps) {
         });
         socket.off('receive-chat', handleReceiveChat);
         socket.off('disconnect');
+        socket.disconnect();
       };
     }
   }, [socket, handleReceiveChat]);
@@ -82,7 +88,13 @@ function Page({ params }: PageProps) {
   useEffect(() => {
     {
       if (socket) {
-        socket.emit('join-room-agent', roomId)
+        const res = {
+          roomId: roomId,
+          agentName: name
+        }
+
+
+        socket.emit('join-room-agent', res)
         toast({
           title: "Connected",
           description: "You are now connected to the chat",
@@ -112,7 +124,6 @@ function Page({ params }: PageProps) {
   };
 
 
-
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -129,13 +140,28 @@ function Page({ params }: PageProps) {
 
     handleSendData();
     setMessage("");
+  }
 
+  function handleClick() {
+
+
+    const res = {
+      customerAgentRoomId: roomId,
+    }
+    http.put(`rooms/customer-agent/accept`, res)
+    router.push(`/customer-chats`);
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8 bg-muted/30 p-2 rounded-lg overflow-y-clip">
       <div className="grid items-start gap-4 lg:col-span-2 lg:gap-3">
-        <ProfileInformation name="jojo" email="jojo@gmail.com" />
+        <Card className="flex justify-between w-full p-5">
+          <div className="flex flex-col gap-2">
+            <div className="font-lg">Customer Chat</div>
+            <Separator />
+          </div>
+          <FinishedChatButton onclick={handleClick} />
+        </Card>
         <Card x-chunk="Page-07-chunk-1" className="flex flex-col gap-2 justify-content-around">
           {/* Chat Box Container */}
 
