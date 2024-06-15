@@ -80,7 +80,7 @@ const Page = () => {
       });
     });
 
-    peer.on("disconnected", () => {});
+    peer.on("disconnected", () => { });
 
     peer.on("close", () => {
       cleanup();
