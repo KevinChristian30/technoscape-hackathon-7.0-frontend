@@ -8,5 +8,5 @@ export const useEmails = (dto: EmailsPaginationRequestDTO) =>
   useQuery({
     queryKey: ["listEmailsGet"],
     queryFn: () => listEmailsGet(dto),
-    retry: 1,
+    retry: 0,
   });

@@ -1,9 +1,5 @@
-import EmailSection from "@/components/domain/email/EmailSection";
-import {
-  PageLayout,
-  PageLayoutContent,
-  PageLayoutHeader,
-} from "@/components/layouts/PageLayout";
+import EmailTable from "@/components/domain/email/EmailTable";
+import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 import React from "react";
 
 const Page = () => {
@@ -14,10 +10,7 @@ const Page = () => {
       </PageLayoutHeader>
 
       <div className="h-8"></div>
-
-      <PageLayoutContent className="w-full">
-        <EmailSection />
-      </PageLayoutContent>
+      <EmailTable />
     </PageLayout>
   );
 };
