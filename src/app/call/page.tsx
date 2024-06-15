@@ -1,11 +1,30 @@
 "use client";
 
-import MHDError from "@/components/domain/MHDError";
+import MHDForm from "@/components/domain/MHDFom";
+import MHDTextField from "@/components/domain/MHDTextField";
 import MHDVideoCall from "@/components/domain/MHDVideoCall";
+import LoadingScreen from "@/components/screens/LoadingScreen";
+import { Button } from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
+import { toast } from "@/components/ui/hooks/useToast";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useCallQueue } from "@/composables/queue/query/useCallQueue";
+import { useCreateCallQueue } from "@/composables/queue/mutation/useCreateCallQueue";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().min(1),
+});
 
 const Page = () => {
   const [peerId, setPeerId] = useState<string | undefined>();
@@ -17,10 +36,19 @@ const Page = () => {
   const localMediaStream = useRef<MediaStream | null>(null);
 
   const [connected, setConnected] = useState<boolean>(false);
-  const [cameraOn, setCameraOn] = useState<boolean>(false);
-  const [micOn, setMicOn] = useState<boolean>(false);
+  const [cameraOn, setCameraOn] = useState<boolean>(true);
+  const [micOn, setMicOn] = useState<boolean>(true);
 
-  const { data, status } = useCallQueue();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const { mutate, data, status, error } = useCreateCallQueue();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      name: "",
+    },
+  });
 
   useEffect(() => {
     const peer = new Peer();
@@ -65,6 +93,10 @@ const Page = () => {
       peer.off("close");
       peer.destroy();
     };
+  }, []);
+
+  useEffect(() => {
+    setDialogOpen(true);
   }, []);
 
   const cleanup = () => {
@@ -143,24 +175,100 @@ const Page = () => {
     }
   };
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutate({
+      email: values.email,
+      name: values.name,
+      peerId: peerId!,
+    });
+  }
+
+  useEffect(() => {
+    if (status === "error") {
+      toast({
+        title: "Something went wrong",
+        description:
+          error.response?.data.errors[0] ?? "Failed creating call query",
+        variant: "destructive",
+      });
+    } else if (status === "success") {
+      toast({
+        title: "Success",
+        description: "Call query submitted, we will be with you soon",
+        variant: "success",
+      });
+
+      setDialogOpen(false);
+    }
+  }, [status, data]);
+
+  if (!peerId) {
+    return <LoadingScreen></LoadingScreen>;
+  }
+
   return (
-    <div className="grid place-items-center h-screen">
-      <div className="">
-        <MHDVideoCall
-          cleanup={cleanup}
-          localRef={localVideoRef}
-          remoteRef={remoteAudioRef}
-          onShareScreenClick={shareScreenOnClick}
-          peerInstance={peerInstance}
-          connected={connected}
-          cameraOn={cameraOn}
-          toggleCamera={toggleCamera}
-          micOn={micOn}
-          setMicOn={setMicOn}
-          toggleMic={toggleMic}
-        />
+    <>
+      <Dialog open={dialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start Call</DialogTitle>
+            <DialogDescription>
+              Enter your data, and we will queue you a call with our best
+              customer service.
+            </DialogDescription>
+
+            <div className="h-4"></div>
+
+            <MHDForm
+              form={form}
+              className="space-y-4 mx-auto grid w-full gap-6"
+              onFormSubmit={onSubmit}
+            >
+              <MHDTextField
+                control={form.control}
+                name="name"
+                label="Name"
+                placeHolder="Jon Doe"
+              />
+
+              <MHDTextField
+                control={form.control}
+                name="email"
+                label="Email"
+                placeHolder="jon.doe@gmail.com"
+                type="email"
+              />
+
+              <Button
+                type="submit"
+                className="w-full"
+                isLoading={status === "pending"}
+              >
+                Queue Call
+              </Button>
+            </MHDForm>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid place-items-center h-screen">
+        <div>
+          <MHDVideoCall
+            cleanup={cleanup}
+            localRef={localVideoRef}
+            remoteRef={remoteAudioRef}
+            onShareScreenClick={shareScreenOnClick}
+            peerInstance={peerInstance}
+            connected={connected}
+            cameraOn={cameraOn}
+            toggleCamera={toggleCamera}
+            micOn={micOn}
+            setMicOn={setMicOn}
+            toggleMic={toggleMic}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
