@@ -5,7 +5,7 @@ import MHDVideoCall from "@/components/domain/MHDVideoCall";
 import { PageLayout, PageLayoutHeader } from "@/components/layouts/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Separator } from "@/components/ui/Separator";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCallQueue } from "@/composables/queue/query/useCallQueue";
 import { Peer } from "peerjs";
