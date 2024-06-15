@@ -1,63 +1,88 @@
 "use client";
-import SidePanelMobile from "@/components/layouts/SidePanelMobile";
+
+import MHDForm from "@/components/domain/MHDFom";
+import MHDTextField from "@/components/domain/MHDTextField";
+import MHDVideoCall from "@/components/domain/MHDVideoCall";
+import LoadingScreen from "@/components/screens/LoadingScreen";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { List } from "lucide-react";
-import { Peer } from "peerjs";
 import {
-  AudioHTMLAttributes,
-  DetailedHTMLProps,
-  DetailedReactHTMLElement,
-  LegacyRef,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
+import { toast } from "@/components/ui/hooks/useToast";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useCreateCallQueue } from "@/composables/queue/mutation/useCreateCallQueue";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Peer } from "peerjs";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().min(1),
+});
 
 const Page = () => {
   const [peerId, setPeerId] = useState<string | undefined>();
-  const [targetPeerId, setTargetPeerId] = useState<string | undefined>();
   const peerInstance = useRef<Peer | null>(null);
   const currentPeer = useRef<RTCPeerConnection | null>(null);
   const remoteAudioRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
 
+  const localMediaStream = useRef<MediaStream | null>(null);
+
+  const [connected, setConnected] = useState<boolean>(false);
+  const [cameraOn, setCameraOn] = useState<boolean>(true);
+  const [micOn, setMicOn] = useState<boolean>(true);
+
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const { mutate, data, status, error } = useCreateCallQueue();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      name: "",
+    },
+  });
+
   useEffect(() => {
     const peer = new Peer();
 
-    peer.on("open", (id) => {
+    peer.on("open", (id: any) => {
       setPeerId(id);
+      console.log(id);
     });
 
-    peer.on("call", async (call) => {
+    peer.on("call", async (call: any) => {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
+        video: cameraOn,
+        audio: micOn,
       });
+      localMediaStream.current = mediaStream;
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = mediaStream;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      call.answer(mediaStream);
-      call.on("stream", (remoteStream) => {
+      call.answer(localMediaStream.current);
+      call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
           currentPeer.current = call.peerConnection;
+          setConnected(true);
         }
       });
     });
 
-    peer.on("disconnected", () => {
-      console.log("Peer disconnected");
-    });
+    peer.on("disconnected", () => {});
 
     peer.on("close", () => {
-      console.log("Peer connection closed");
       cleanup();
     });
     peerInstance.current = peer;
@@ -68,6 +93,10 @@ const Page = () => {
       peer.off("close");
       peer.destroy();
     };
+  }, []);
+
+  useEffect(() => {
+    setDialogOpen(true);
   }, []);
 
   const cleanup = () => {
@@ -91,26 +120,30 @@ const Page = () => {
       currentPeer.current.close();
       currentPeer.current = null;
     }
+
+    setConnected(false);
   };
 
-  const callOnclick = async () => {
+  const callOnclick = async (id: string) => {
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    if (peerInstance.current && targetPeerId) {
+    localMediaStream.current = mediaStream;
+    if (peerInstance.current && id) {
       if (localVideoRef.current) {
-        localVideoRef.current.srcObject = mediaStream;
+        localVideoRef.current.srcObject = localMediaStream.current;
         localVideoRef.current.volume = 0;
         localVideoRef.current.play();
       }
-      const call = peerInstance.current.call(targetPeerId, mediaStream);
-      call.on("stream", (remoteStream) => {
+      const call = peerInstance.current.call(id, localMediaStream.current);
+      call.on("stream", (remoteStream: any) => {
         if (remoteAudioRef && remoteAudioRef.current) {
           remoteAudioRef.current.srcObject = remoteStream;
           remoteAudioRef.current.play();
           currentPeer.current = call.peerConnection;
           call.peerConnection.iceConnectionState;
+          setConnected(true);
         }
       });
     }
@@ -128,40 +161,112 @@ const Page = () => {
     sender?.replaceTrack(videoTrack);
   };
 
-  const tags = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-  );
+  const toggleCamera = () => {
+    setCameraOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getVideoTracks()[0].enabled = cameraOn;
+    }
+  };
+
+  const toggleMic = () => {
+    setMicOn((prevState) => !prevState);
+    if (localMediaStream.current) {
+      localMediaStream.current.getAudioTracks()[0].enabled = micOn;
+    }
+  };
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutate({
+      email: values.email,
+      name: values.name,
+      peerId: peerId!,
+    });
+  }
+
+  useEffect(() => {
+    if (status === "error") {
+      toast({
+        title: "Something went wrong",
+        description:
+          error.response?.data.errors[0] ?? "Failed creating call query",
+        variant: "destructive",
+      });
+    } else if (status === "success") {
+      toast({
+        title: "Success",
+        description: "Call query submitted, we will be with you soon",
+        variant: "success",
+      });
+
+      setDialogOpen(false);
+    }
+  }, [status, data]);
+
+  if (!peerId) {
+    return <LoadingScreen></LoadingScreen>;
+  }
+
   return (
     <>
-      <div className="w-1/4 bg-white p-4 overflow-auto">
-        <h2 className="text-xl font-bold mb-4">Queue</h2>
-        <ScrollArea className="w-48 rounded-md border">
-          {tags.map((tag) => (
-            <>
-              <div key={tag} className="text-sm p-4">
-                {tag}
-              </div>
-              <Separator className="my-2" />
-            </>
-          ))}
-        </ScrollArea>
-      </div>
-      <Input type="text" onChange={(e) => setTargetPeerId(e.target.value)} />
-      <Button onClick={callOnclick}>Call</Button>
-      <Button onClick={shareScreenOnClick}>Share Screen</Button>
-      <Button
-        onClick={() => {
-          peerInstance.current?.disconnect;
-          cleanup();
-        }}
-      >
-        Disconnect
-      </Button>
-      <div>
-        <video ref={remoteAudioRef} />
-      </div>
-      <div>
-        <video ref={localVideoRef} />
+      <Dialog open={dialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start Call</DialogTitle>
+            <DialogDescription>
+              Enter your data, and we will queue you a call with our best
+              customer service.
+            </DialogDescription>
+
+            <div className="h-4"></div>
+
+            <MHDForm
+              form={form}
+              className="space-y-4 mx-auto grid w-full gap-6"
+              onFormSubmit={onSubmit}
+            >
+              <MHDTextField
+                control={form.control}
+                name="name"
+                label="Name"
+                placeHolder="Jon Doe"
+              />
+
+              <MHDTextField
+                control={form.control}
+                name="email"
+                label="Email"
+                placeHolder="jon.doe@gmail.com"
+                type="email"
+              />
+
+              <Button
+                type="submit"
+                className="w-full"
+                isLoading={status === "pending"}
+              >
+                Queue Call
+              </Button>
+            </MHDForm>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid place-items-center h-screen">
+        <div>
+          <MHDVideoCall
+            cleanup={cleanup}
+            localRef={localVideoRef}
+            remoteRef={remoteAudioRef}
+            onShareScreenClick={shareScreenOnClick}
+            peerInstance={peerInstance}
+            connected={connected}
+            cameraOn={cameraOn}
+            toggleCamera={toggleCamera}
+            micOn={micOn}
+            setMicOn={setMicOn}
+            toggleMic={toggleMic}
+          />
+        </div>
       </div>
     </>
   );
