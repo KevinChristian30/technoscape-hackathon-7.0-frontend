@@ -27,8 +27,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 enum Sender {
-  ME,
-  AI,
+  ME = "You",
+  AI = "AI",
 }
 
 interface CustomerAIChatResponseWithDummmySender
@@ -55,6 +55,7 @@ const Page = () => {
     data: chatResponse,
     mutate: sendChat,
     status: sendChatStatus,
+    error: sendChatError,
   } = useCustomerAIChat();
 
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -99,17 +100,24 @@ const Page = () => {
   }, [status, data]);
 
   useEffect(() => {
-    if (status === "error") {
+    if (sendChatStatus === "error") {
       toast({
         title: "Something went wrong",
-        description: error.response?.data.errors[0] ?? "Failed sending query",
+        description:
+          sendChatError.response?.data.errors[0] ?? "Failed sending query",
         variant: "destructive",
       });
-    } else if (status === "success" && chatResponse) {
-      handleReceiveChat({ data: { message: message }, sender: Sender.ME });
-      handleReceiveChat({ data: chatResponse?.data, sender: Sender.AI });
+    } else if (sendChatStatus === "success" && chatResponse) {
+      handleReceiveChat({ data: chatResponse.data, sender: Sender.AI });
     }
   }, [sendChatStatus, data, chatResponse]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.lastElementChild.scrollTop =
+        scrollRef.current.lastElementChild.scrollHeight + 1000;
+    }
+  }, [history]);
 
   function onUserDataSent(values: z.infer<typeof formSchema>) {
     mutate({
@@ -131,6 +139,7 @@ const Page = () => {
       return;
     }
 
+    handleReceiveChat({ data: { message: message }, sender: Sender.ME });
     sendChat({
       customerName: roomData!.data.customerName,
       message: message,
@@ -226,6 +235,7 @@ const Page = () => {
               size="sm"
               variant="default"
               className="gap-1 dark:text-white"
+              isLoading={sendChatStatus === "pending"}
             >
               Send <ArrowRightToLine className="h-4 w-4" />
             </Button>
