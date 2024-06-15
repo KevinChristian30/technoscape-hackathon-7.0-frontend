@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/Button";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { Clipboard, Reply } from "lucide-react";
 import { toast } from "@/components/ui/hooks/useToast";
+import { Input } from "@/components/ui/Input";
+import { EmailBottomCardSection } from "./EmailBottomCardSection";
 
 const EmailSection = () => {
   const paginationDTO = new EmailsPaginationRequestDTO("1", "10");
@@ -36,9 +38,7 @@ const EmailSection = () => {
     return <MHDError></MHDError>;
   }
 
-  const replyEmail = () => {
-    
-  }
+  const replyEmail = (email: EmailListResponse) => {};
 
   return (
     <div className="flex gap-2">
@@ -59,22 +59,7 @@ const EmailSection = () => {
                         {email.bodyText.split("--00000")[0]}
                       </div>
 
-                      <div className="flex justify-end w-full items-center gap-2">
-                        <Button
-                          size={"icon"}
-                          onClick={() => {replyEmail}}
-                        >
-                          <Reply />
-                        </Button>
-                        <Button
-                          size={"icon"}
-                          onClick={() =>
-                            copy(email.bodyText.split("--00000")[0])
-                          }
-                        >
-                          <Clipboard />
-                        </Button>
-                      </div>
+                      <EmailBottomCardSection email={email} />
                     </Card>
                     <Separator className="my-2" />
                   </div>
