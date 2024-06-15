@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/hooks/useToast";
 import { useCreateCallQueue } from "@/composables/queue/mutation/useCreateCallQueue";
+import { createQueuePost } from "@/services/queue/createQueue.post";
+import useSocket from "@/socket/useSocket";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
@@ -26,6 +28,8 @@ const formSchema = z.object({
 });
 
 const Page = () => {
+  const serverUrl = process.env.NEXT_PUBLIC_BASE_URL + "live-call/queue" || "";
+  const socket = useSocket({ serverUrl: serverUrl });
   const [peerId, setPeerId] = useState<string | undefined>();
   const peerInstance = useRef<Peer | null>(null);
   const currentPeer = useRef<RTCPeerConnection | null>(null);
@@ -37,6 +41,7 @@ const Page = () => {
   const [connected, setConnected] = useState<boolean>(false);
   const [cameraOn, setCameraOn] = useState<boolean>(true);
   const [micOn, setMicOn] = useState<boolean>(true);
+  const [flag, setFlag] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const { mutate, data, status, error } = useCreateCallQueue();
@@ -48,6 +53,22 @@ const Page = () => {
       name: "",
     },
   });
+
+  useEffect(() => {
+    if (socket) {
+      setFlag(true);
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    {
+      console.log(flag);
+      if (socket) {
+        socket.emit("join-room");
+        console.log("Connected");
+      }
+    }
+  }, [flag]);
 
   useEffect(() => {
     const peer = new Peer();
@@ -174,32 +195,45 @@ const Page = () => {
     }
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    mutate({
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // mutate({
+    //   email: values.email,
+    //   name: values.name,
+    //   peerId: peerId!,
+    // });
+    const data = await createQueuePost({
       email: values.email,
       name: values.name,
       peerId: peerId!,
     });
+    toast({
+      title: "Success",
+      description: "Call query submitted, we will be with you soon",
+      variant: "success",
+    });
+
+    setDialogOpen(false);
+    socket?.emit("new-queue-added");
   }
 
-  useEffect(() => {
-    if (status === "error") {
-      toast({
-        title: "Something went wrong",
-        description:
-          error.response?.data.errors[0] ?? "Failed creating call query",
-        variant: "destructive",
-      });
-    } else if (status === "success") {
-      toast({
-        title: "Success",
-        description: "Call query submitted, we will be with you soon",
-        variant: "success",
-      });
+  // useEffect(() => {
+  //   if (status === "error") {
+  //     toast({
+  //       title: "Something went wrong",
+  //       description:
+  //         error.response?.data.errors[0] ?? "Failed creating call query",
+  //       variant: "destructive",
+  //     });
+  //   } else if (status === "success") {
+  //     toast({
+  //       title: "Success",
+  //       description: "Call query submitted, we will be with you soon",
+  //       variant: "success",
+  //     });
 
-      setDialogOpen(false);
-    }
-  }, [status, data]);
+  //     setDialogOpen(false);
+  //   }
+  // }, [status, data]);
 
   if (!peerId) {
     return <LoadingScreen></LoadingScreen>;

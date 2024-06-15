@@ -10,6 +10,10 @@ import {
   VideoOff,
 } from "lucide-react";
 import Peer from "peerjs";
+import { QueueResponseDTO } from "@/dtos/LiveCallQueueResponseDTO";
+import { useDeleteCallQueue } from "@/composables/queue/mutation/useDeleteCallQueue";
+import { Socket } from "socket.io-client";
+import { deleteQueuePost } from "@/services/queue/deleteQueue.delete";
 
 interface Props {
   localRef: LegacyRef<HTMLVideoElement> | undefined;
@@ -23,6 +27,8 @@ interface Props {
   micOn: boolean;
   toggleMic: () => void;
   setMicOn: React.Dispatch<SetStateAction<boolean>>;
+  currentQueue: QueueResponseDTO | null;
+  socket: Socket | null;
 }
 
 const MHDVideoCall = ({
@@ -37,7 +43,11 @@ const MHDVideoCall = ({
   micOn,
   setMicOn,
   toggleMic,
+  currentQueue,
+  socket,
 }: Props) => {
+  const { data, error, mutate, status } = useDeleteCallQueue();
+
   return (
     <div className="w-full border-2 rounded-md p-4">
       <div className="w-full relative">
@@ -56,56 +66,62 @@ const MHDVideoCall = ({
       </div>
 
       <div className="h-4"></div>
+      {connected && (
+        <div className="w-full flex items-center justify-end gap-2">
+          {!micOn ? (
+            <Button variant={"default"} size={"icon"} onClick={toggleMic}>
+              <Mic />
+            </Button>
+          ) : (
+            <Button
+              variant={"outline"}
+              size={"icon"}
+              className="border border-primary text-primary hover:text-primary"
+              onClick={toggleMic}
+            >
+              <MicOff />
+            </Button>
+          )}
 
-      <div className="w-full flex items-center justify-end gap-2">
-        {!micOn ? (
+          {!cameraOn ? (
+            <Button variant={"default"} size={"icon"} onClick={toggleCamera}>
+              <Video />
+            </Button>
+          ) : (
+            <Button
+              variant={"outline"}
+              size={"icon"}
+              className="border border-primary text-primary hover:text-primary"
+              onClick={toggleCamera}
+            >
+              <VideoOff />
+            </Button>
+          )}
+          <Button onClick={onShareScreenClick} className="flex gap-2">
+            <ScreenShare className="w-4 h-4" />
+            Share Screen
+          </Button>
           <Button
-            variant={"default"}
-            size={"icon"}
-            onClick={toggleMic}
+            variant={"destructive"}
+            onClick={async () => {
+              if (currentQueue && socket) {
+                await deleteQueuePost({
+                  email: currentQueue.customerEmail,
+                  name: currentQueue.customerName,
+                  peerId: currentQueue.peerJsID,
+                });
+                socket.emit("delete-post");
+                peerInstance?.current?.disconnect();
+                peerInstance.current = null;
+                cleanup();
+              }
+            }}
+            className="flex gap-2"
           >
-            <Mic />
+            <Unplug className="w-4 h-4" /> Disconnect
           </Button>
-        ) : (
-          <Button
-            variant={"outline"}
-            size={"icon"}
-            className="border border-primary text-primary hover:text-primary"
-            onClick={toggleMic}
-          >
-            <MicOff />
-          </Button>
-        )}
-
-        {!cameraOn ? (
-          <Button variant={"default"} size={"icon"} onClick={toggleCamera}>
-            <Video />
-          </Button>
-        ) : (
-          <Button
-            variant={"outline"}
-            size={"icon"}
-            className="border border-primary text-primary hover:text-primary"
-            onClick={toggleCamera}
-          >
-            <VideoOff />
-          </Button>
-        )}
-        <Button onClick={onShareScreenClick} className="flex gap-2">
-          <ScreenShare className="w-4 h-4" />
-          Share Screen
-        </Button>
-        <Button
-          variant={"destructive"}
-          onClick={() => {
-            peerInstance?.current?.disconnect;
-            cleanup();
-          }}
-          className="flex gap-2"
-        >
-          <Unplug className="w-4 h-4" /> Disconnect
-        </Button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
