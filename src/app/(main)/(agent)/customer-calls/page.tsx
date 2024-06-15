@@ -7,24 +7,35 @@ import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Separator } from "@/components/ui/Separator";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useDeleteCallQueue } from "@/composables/queue/mutation/useDeleteCallQueue";
 import { useCallQueue } from "@/composables/queue/query/useCallQueue";
+import { QueueResponseDTO } from "@/dtos/LiveCallQueueResponseDTO";
+import useSocket from "@/socket/useSocket";
+import { useMutation } from "@tanstack/react-query";
 import { Peer } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 
 const Page = () => {
+  const serverUrl = process.env.NEXT_PUBLIC_BASE_URL + "live-call/queue" || "";
   const [peerId, setPeerId] = useState<string | undefined>();
   const peerInstance = useRef<Peer | null>(null);
   const currentPeer = useRef<RTCPeerConnection | null>(null);
   const remoteAudioRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const socket = useSocket({ serverUrl });
+  const [flag, setFlag] = useState(false);
 
   const localMediaStream = useRef<MediaStream | null>(null);
 
   const [connected, setConnected] = useState<boolean>(false);
   const [cameraOn, setCameraOn] = useState<boolean>(false);
   const [micOn, setMicOn] = useState<boolean>(false);
-
-  const { data, status } = useCallQueue();
+  const [queues, setQueues] = useState<QueueResponseDTO[]>([]);
+  const { data, error, mutate, status } = useDeleteCallQueue();
+  const [currentQueue, setCurrentQueue] = useState<QueueResponseDTO | null>(
+    null
+  );
+  // const { data, status } = useCallQueue();
 
   useEffect(() => {
     const peer = new Peer();
@@ -71,13 +82,33 @@ const Page = () => {
     };
   }, []);
 
-  if (status === "pending") {
-    return <Skeleton className="w-full h-96"></Skeleton>;
-  }
+  useEffect(() => {
+    if (socket) {
+      setFlag(true);
+      socket.on("receive-new-queue", (queues) => {
+        console.log(queues);
+        setQueues(queues);
+      });
+    }
+  }, [socket]);
 
-  if (status === "error") {
-    return <MHDError />;
-  }
+  useEffect(() => {}, [queues]);
+
+  useEffect(() => {
+    {
+      if (socket) {
+        socket.emit("join-agent-room");
+      }
+    }
+  }, [flag]);
+
+  // if (status === "pending") {
+  //   return <Skeleton className="w-full h-96"></Skeleton>;
+  // }
+
+  // if (status === "error") {
+  //   return <MHDError />;
+  // }
 
   const cleanup = () => {
     if (localVideoRef.current?.srcObject) {
@@ -165,17 +196,18 @@ const Page = () => {
         <div className="p-4 overflow-auto w-72">
           <ScrollArea className=" h-[500px] rounded-md border">
             <div className="p-4">
-              {data.data.length <= 0
+              {queues.length <= 0
                 ? "No Data"
-                : data.data.map((tag: any) => (
-                    <div key={tag}>
+                : queues.map((queue: QueueResponseDTO) => (
+                    <div key={queue.id}>
                       <Button
                         className="w-full"
                         onClick={() => {
-                          callOnclick(tag.peerJsID);
+                          callOnclick(queue.peerJsID);
+                          setCurrentQueue(queue);
                         }}
                       >
-                        {tag.customerName.slice(0, 16)}
+                        {queue.customerName.slice(0, 16)}
                       </Button>
                       <Separator className="my-2" />
                     </div>
@@ -196,6 +228,8 @@ const Page = () => {
           micOn={micOn}
           setMicOn={setMicOn}
           toggleMic={toggleMic}
+          currentQueue={currentQueue}
+          socket={socket}
         />
       </div>
     </PageLayout>
