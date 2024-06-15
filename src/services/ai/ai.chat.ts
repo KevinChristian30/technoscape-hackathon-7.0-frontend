@@ -1,23 +1,26 @@
 import http from "@/lib/axios";
-import makeResponseDTO from "@/lib/response";
 import { z } from "zod";
 
-export interface LoginPayload {
-  email: string;
-  password: string;
+export interface CustomerAIChatRequestPayload {
+  roomId: string;
+  message: string;
+  customerName: string;
 }
 
-const loginResponseValidation = makeResponseDTO(
-  z.object({
-    token: z.string(),
-  }),
-);
+const customerAIChatRequestPayload = z.object({
+  data: z.object({ message: z.string() }),
+});
 
-export type LoginResponse = z.infer<typeof loginResponseValidation>;
+export type CustomerAIChatResponse = z.infer<
+  typeof customerAIChatRequestPayload
+>;
 
-export const loginPost = async (
-  payload: LoginPayload,
-): Promise<LoginResponse> => {
-  const res = await http.post<LoginResponse>("auth/login", payload);
-  return loginResponseValidation.parse(res.data);
+export const customerAIChat = async (
+  payload: CustomerAIChatRequestPayload
+): Promise<CustomerAIChatResponse> => {
+  const res = await http.post<CustomerAIChatResponse>(
+    "chats/customer-ai",
+    payload
+  );
+  return customerAIChatRequestPayload.parse(res.data);
 };
