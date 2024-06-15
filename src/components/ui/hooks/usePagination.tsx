@@ -71,7 +71,7 @@ const usePagination = () => {
             <SelectValue placeholder="Per Page" />
           </SelectTrigger>
           <SelectContent>
-            {[5, 10, 25, 50, 100].map((number) => {
+            {[5, 10].map((number) => {
               return (
                 <SelectItem key={number} value={number.toString()}>
                   {number}

@@ -23,6 +23,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
+import SenderChatBubble from "@/components/chat/SenderChatBubble";
+import CancelChatButton from "@/components/ui/FinishChatButton";
+import http from "@/lib/axios";
+import { useRouter } from "next/navigation";
+
 
 
 
@@ -59,6 +64,8 @@ function Page() {
     const [history, setHistory] = useState<CustomerAgentChatDto[]>([]);
 
     const socket = useSocket({ serverUrl });
+
+    const router = useRouter();
 
     const scrollRef = useRef<any>(null);
 
@@ -126,24 +133,7 @@ function Page() {
             setLoading(true);
         }
 
-        return () => {
-
-        }
     }, [info])
-
-
-
-
-
-
-    // /rooms/customer-agent
-    // export interface CreateCustomerAgentRoomRequestDto {
-    //     customerEmail: string,
-    //     customerName: string,
-    // }
-
-
-
 
 
     useEffect(() => {
@@ -156,6 +146,7 @@ function Page() {
         if (socket) {
             socket.on('receive-chat', handleReceiveChat);
             socket.on('agent-joined', (agentName: string) => {
+                setLoading(false);
                 setAgentName(agentName)
             })
             return () => {
@@ -167,42 +158,28 @@ function Page() {
                 });
                 socket.off('receive-chat', handleReceiveChat);
                 socket.off('disconnect');
+                socket.disconnect();
+
             };
         }
     }, [socket, handleReceiveChat]);
 
+    const handleSendData = () => {
+        if (socket) {
 
-    // useEffect(() => {
-    //     {
-    //         if (socket) {
-    //             socket.emit('join-room-agent', roomId)
-    //             toast({
-    //                 title: "Connected",
-    //                 description: "You are now connected to the chat",
-    //                 variant: "success",
-    //                 duration: 1500,
-    //             });
-    //             console.log("Connected");
-    //         }
-    //     }
-    // }, [flag])
+            const payload = {
+                roomId: info!.roomId,
+                message: message,
+                name: info!.customerName,
+                userId: null,
+            }
 
+            console.log(payload);
 
-    // const handleSendData = () => {
-    //     if (socket) {
+            socket.emit('send-chat', payload);
+        }
 
-    //         const payload = {
-    //             roomId: roomId,
-    //             message: message,
-    //             name: null,
-    //             userId: null,
-    //         }
-
-
-    //         socket.emit('send-chat', payload);
-    //     }
-
-    // };
+    };
 
 
 
@@ -219,7 +196,16 @@ function Page() {
             });
             return;
         }
+        handleSendData();
         setMessage("");
+    }
+
+    function handleClick() {
+        const res = {
+            customerAgentRoomId: info!.roomId,
+        }
+        http.put(`rooms/customer-agent/accept`, res)
+        router.push(`/customer-service`);
     }
 
     return (
@@ -228,24 +214,29 @@ function Page() {
 
             <div className="w-full flex items-center pb-2">
                 <PageLayoutHeader>
-                    {loading && "Please Wait For Our Customer Support To Help You"}
+                    {loading && <div className="flex gap-2 items-center justify-between">
+                        <span>
+                            "Please Wait For Our Customer Support To Help You"
+                        </span>
+                        {loading && <LoaderCircle className="h-8 w-8 ml-6  animate-spin" />}
+
+                    </div>}
                 </PageLayoutHeader>
-                {loading && <LoaderCircle className="h-8 w-8 ml-8  animate-spin" />}
             </div>
             {agentName && <ProfileInformation name={agentName} agent email="" title="Meet Your Customer Support !" />}
 
-            <Card x-chunk="Page-07-chunk-1" className="">
+            <Card x-chunk="Page-07-chunk-1" className="mt-3">
                 {/* Chat Box Container */}
 
                 <ScrollArea className="h-[34rem] w-full rounded-md border p-6 flex flex-col-reverse" ref={scrollRef} >
-                    {/* {history.map((chat, index) => {
-                        if (chat.userId === id) {
-                            return <SenderChatBubble key={index} name={name} time={chat.createdAt.toString()} message={chat.message} />
+                    {history.map((chat, index) => {
+                        if (chat.userId === info?.agentId) {
+                            return <SenderChatBubble key={index} name={form.getValues().name} time={chat.createdAt.toString()} message={chat.message} />
                         } else {
-                            return <RecepientChatBubble key={index} name={chat.name} time={chat.createdAt.toString()} message={chat.message} />
+                            return <RecepientChatBubble key={index} name={agentName} time={chat.createdAt.toString()} message={chat.message} />
                         }
-                    })} */}
-                    <RecepientChatBubble key={"1"} name={"name"} time={"chat.createdAt.toString()"} message={"chat.message"} />
+                    })}
+
 
 
                 </ScrollArea>

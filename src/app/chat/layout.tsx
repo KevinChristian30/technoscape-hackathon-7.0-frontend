@@ -16,7 +16,7 @@ export default function RootLayout({
                 <Title />
                 <ThemeToggleButton />
             </div>
-            <main className="flex flex-1 flex-col px-6 pt-10">
+            <main className="flex flex-1 flex-col px-6 pt-3">
                 {children}
             </main>
 
