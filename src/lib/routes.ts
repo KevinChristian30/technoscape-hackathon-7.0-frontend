@@ -43,7 +43,7 @@ export const agentRoutes: Route[] = [
   {
     name: "Ask AI",
     icon: BotMessageSquare,
-    url: "/ai-chat",
+    url: "/ai-agent-chat",
   },
   {
     name: "Chats",

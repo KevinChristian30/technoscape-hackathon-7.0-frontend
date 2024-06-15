@@ -2,81 +2,60 @@
 
 import RecepientChatBubble from "@/components/chat/RecepientChatBubble";
 import SenderChatBubble from "@/components/chat/SenderChatBubble";
-import MHDForm from "@/components/domain/MHDFom";
-import MHDTextField from "@/components/domain/MHDTextField";
+import MHDError from "@/components/domain/MHDError";
+import LoadingScreen from "@/components/screens/LoadingScreen";
 import { Button } from "@/components/ui/Button";
 import { Card, CardFooter } from "@/components/ui/Card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/hooks/useToast";
 import { Input } from "@/components/ui/Input";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { useCreateCustomerAIChatRoom } from "@/composables/ai/mutation/useCreateCustomerAIChatRoom";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useCreateAgentAIChatRoom } from "@/composables/ai/mutation/useCreateAgentAIChatRoom";
+import { useAgentAIChat } from "@/composables/ai/query/useAgentAIChat";
 import { useCustomerAIChat } from "@/composables/ai/query/useCustomerAIChat";
+import { useUser } from "@/providers/UserProvider";
 import { CustomerAIChatResponse } from "@/services/ai/ai.chat";
-import { CreateCustomerAIChatRoomResponse } from "@/services/ai/createCustomerAIChatRoom.post";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { CreateAgentAIChatRoomResponse } from "@/services/ai/createAgentAIChatRoom.post";
 import { ArrowRightToLine } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 enum Sender {
   ME = "You",
   AI = "AI",
 }
 
-interface CustomerAIChatResponseWithDummmySender
-  extends CustomerAIChatResponse {
+interface AgentAIChatResponseWithDummmySender extends CustomerAIChatResponse {
   sender: Sender;
 }
 
-const formSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().min(1),
-});
-
 const Page = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      name: "",
-    },
-  });
-
-  const { data, mutate, status, error } = useCreateCustomerAIChatRoom();
+  const { id } = useUser();
+  const { data, mutate, status, error } = useCreateAgentAIChatRoom();
   const {
     data: chatResponse,
     mutate: sendChat,
     status: sendChatStatus,
     error: sendChatError,
-  } = useCustomerAIChat();
+  } = useAgentAIChat();
 
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [roomData, setRoomData] =
-    useState<CreateCustomerAIChatRoomResponse | null>(null);
+    useState<CreateAgentAIChatRoomResponse | null>(null);
   const [message, setMessage] = useState<string>("");
-  const [history, setHistory] = useState<
-    CustomerAIChatResponseWithDummmySender[]
-  >([]);
+  const [history, setHistory] = useState<AgentAIChatResponseWithDummmySender[]>(
+    []
+  );
 
   const scrollRef = useRef<any>(null);
 
   const handleReceiveChat = useCallback(
-    (data: CustomerAIChatResponseWithDummmySender) => {
+    (data: AgentAIChatResponseWithDummmySender) => {
       setHistory((prevHistory) => [...prevHistory, data]);
     },
     []
   );
 
   useEffect(() => {
-    setDialogOpen(true);
+    mutate({ agentId: id });
   }, []);
 
   useEffect(() => {
@@ -95,7 +74,6 @@ const Page = () => {
       });
 
       setRoomData(data);
-      setDialogOpen(false);
     }
   }, [status, data]);
 
@@ -119,13 +97,6 @@ const Page = () => {
     }
   }, [history]);
 
-  function onUserDataSent(values: z.infer<typeof formSchema>) {
-    mutate({
-      customerEmail: values.email,
-      customerName: values.name,
-    });
-  }
-
   const onChatSent = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -141,57 +112,23 @@ const Page = () => {
 
     handleReceiveChat({ data: { message: message }, sender: Sender.ME });
     sendChat({
-      customerName: roomData!.data.customerName,
+      agentId: roomData!.data.agentId,
       message: message,
       roomId: roomData!.data.roomId,
     });
     setMessage("");
   };
 
+  if (status === "pending") {
+    return <Skeleton className="w-full h-96"></Skeleton>
+  }
+
+  if (status === "error") {
+    return <MHDError />;
+  }
+
   return (
-    <div className="w-screen h-screen grid place-items-center">
-      <Dialog open={dialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Start Chatting</DialogTitle>
-            <DialogDescription>
-              Enter your data and out bot will assist you.
-            </DialogDescription>
-
-            <div className="h-4"></div>
-
-            <MHDForm
-              form={form}
-              className="space-y-4 mx-auto grid w-full gap-6"
-              onFormSubmit={onUserDataSent}
-            >
-              <MHDTextField
-                control={form.control}
-                name="name"
-                label="Name"
-                placeHolder="Jon Doe"
-              />
-
-              <MHDTextField
-                control={form.control}
-                name="email"
-                label="Email"
-                placeHolder="jon.doe@gmail.com"
-                type="email"
-              />
-
-              <Button
-                type="submit"
-                className="w-full"
-                isLoading={status === "pending"}
-              >
-                Start Chatting
-              </Button>
-            </MHDForm>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
+    <div className="grid place-items-center">
       <Card className="flex flex-col gap-2 justify-content w-full max-w-[800px]">
         <ScrollArea
           className="h-[34rem] w-full rounded-md border p-6 flex flex-col-reverse"
@@ -204,7 +141,7 @@ const Page = () => {
                   key={index}
                   name={chat.sender.toString()}
                   time={""}
-                  message={chat.data.message.toString()}
+                  message={chat.data.message}
                 />
               );
             } else {
@@ -213,7 +150,7 @@ const Page = () => {
                   key={index}
                   name={chat.sender.toString()}
                   time={""}
-                  message={chat.data.message.toString()}
+                  message={chat.data.message}
                 />
               );
             }
