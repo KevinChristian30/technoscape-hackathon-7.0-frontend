@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog";
 import { toast } from "@/components/ui/hooks/useToast";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useCreateCallQueue } from "@/composables/queue/mutation/useCreateCallQueue";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Peer } from "peerjs";
