@@ -3,7 +3,7 @@ import SidePanelMobile from "@/components/layouts/SidePanelMobile";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui/Separator";
 import { List } from "lucide-react";
 import { Peer } from "peerjs";
 import {
